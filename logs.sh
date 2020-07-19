@@ -1,9 +1,15 @@
 #!/bin/bash
-# Log Reader Script v2 by Jeff Palmer
-# Menu code used from https://bash.cyberciti.biz/guide/Menu_driven_scripts
-# Includes code written by Dustan Barrett
+# Log Reader Script by Jeffrey Palmer
+# Menu code sourced from https://bash.cyberciti.biz/guide/Menu_driven_scripts
+
+## -----------------------------------
+# Step #1: Determine Environment
+# ------------------------------------
+CPANELFILE=/usr/local/cpanel/version
+PLESKFILE=/usr/local/psa/admin/conf/panel.ini
+
 ## ----------------------------------
-# Step #1: Define variables
+# Step #2: Define variables
 # -----------------------------------
 #EDITOR=vim
 #PASSWD=/etc/passwd
@@ -11,16 +17,7 @@ RED='\033[0;41;30m'
 STD='\033[0;0;39m'
 clear
 read -p "Enter a domain name or press Enter to skip: " phpDomain
-trueUserDomain=$(grep $phpDomain /etc/trueuserdomains)
-userName=${trueUserDomain#$phpDomain: }
-userData=$(grep "documentroot:" /var/cpanel/userdata/$userName/$phpDomain)
-documentRoot=${userData#"documentroot: "}
 
-## -----------------------------------
-# Step #2: Determine Environment
-# ------------------------------------
-CPANELFILE=/usr/local/cpanel/version
-PLESKFILE=/usr/local/psa/admin/conf/panel.ini
 # ----------------------------------
 # Step #3: Define cPanel MENU
 # ----------------------------------
@@ -77,13 +74,16 @@ eight(){
 }
 
 nine(){
-	watch -n 1 "mysql -uroot -e 'show processlist;'"
-
+    clear
+	tail -n 6 -f /home/$userName/logs/$phpDomain.php.log $(find $documentRoot -type f -name error_log -printf '%p ') 2> /dev/null	
 }
 
 ten(){
-	tail -n 6 -f /home/$userName/logs/$phpDomain.php.log $(find $documentRoot -type f -name error_log -printf '%p ') 2> /dev/null	
+    clear
+	watch -n 1 "mysql -uroot -e 'show processlist;'"
 }
+
+
  
 # function to display menus
 show_cpanel_menu() {
@@ -100,9 +100,9 @@ show_cpanel_menu() {
 	echo "6. /var/log/secure"
 	echo "7. /usr/local/cpanel/logs/error_log"
 	echo "8. /var/log/exim_mainlog"
-	echo "9. Monitor MySQL Processes"
 	echo  "~~~~~~~~~~~~~~"
-	echo "10. Scan for PHP error logs in document root and ~/logs"
+	echo "9. Scan for PHP error logs in document root and ~/logs"
+	echo "10. Monitor MySQL Processes"
 	echo  "~~~~~~~~~~~~~~"
 	echo "Q. Exit"
 }
@@ -112,7 +112,7 @@ show_cpanel_menu() {
 # Exit when user the user select 3 form the menu option.
 read_options_cpanel(){
 	local choice
-	read -p "Enter choice [ 1 - 16] " choice
+	read -p "Enter choice [ 1 - 10] " choice
 	case $choice in
 		1) one ;;
 		2) two ;;
@@ -136,14 +136,36 @@ pause(){
 }
 
 pleskone(){
-	echo "one() called"
-        pause
+	clear
+	tail -n 25 -f /var/www/vhosts/system/$phpdomain/logs/access_ssl_log /var/www/vhosts/system/$phpdomain/logs/access_log
 }
- 
-# do something in two()
+
 plesktwo(){
-	echo "two() called"
-        pause
+    less +G /var/www/vhosts/$phpdomain/error_log
+}
+
+pleskthree(){
+    less +G /var/log/httpd/error_log
+}
+
+pleskfour(){
+    less +G /var/log/mysqld.log
+}
+
+pleskfive(){
+    less +G /var/log/messages
+}
+
+plesksix(){
+    less +G /var/log/secure
+}
+
+pleskseven(){
+    less +G /var/log/sw-cp-server/error_log
+}
+
+pleskeight(){
+	watch -n 1 "mysql -uroot -e 'show processlist;'"
 }
  
 # function to display menus
@@ -151,11 +173,19 @@ show_plesk_menu() {
 	clear
 	echo "~~~~~~~~~~~~~~~~~~~~~"	
 	echo "Plesk - MAIN MENU"
-	echo " M A I N - M E N U"
+	echo "SELECT A FILE TO OPEN"
 	echo "~~~~~~~~~~~~~~~~~~~~~"
-	echo "1. Set Terminal"
-	echo "2. Reset Terminal"
-	echo "3. Exit"
+	echo "1. /var/www/vhosts/system/$phpdomain/logs/access_log -- HTTPS and HTTP"
+    echo "2. /var/www/vhosts/$phpdomain/error_log"
+    echo "3. /var/log/httpd/error_log"
+	echo "4. /var/log/mysqld.log"
+	echo "5. /var/log/messages"
+	echo "6. /var/log/secure"
+	echo "7. /var/log/sw-cp-server/error_log"
+	echo  "~~~~~~~~~~~~~~"
+	echo "8. Monitor MySQL Processes"
+	echo  "~~~~~~~~~~~~~~"
+	echo "Q. Exit"
 }
 # read input from the keyboard and take a action
 # invoke the one() when the user select 1 from the menu option.
@@ -163,11 +193,16 @@ show_plesk_menu() {
 # Exit when user the user select 3 form the menu option.
 read_options_plesk(){
 	local choice
-	read -p "Enter choice [ 1 - 3] " choice
+	read -p "Enter choice [ 1 - 8] " choice
 	case $choice in
 		1) pleskone ;;
 		2) plesktwo ;;
-		3) clear ; exit 0;;
+        3) plesktwo ;;
+        4) plesktwo ;;
+        5) plesktwo ;;
+        6) plesktwo ;;
+        7) plesktwo ;;
+		q) clear ; exit 0;;
 		*) echo -e "${RED}Error...${STD}" && sleep 2
 	esac
 }
@@ -183,6 +218,10 @@ trap '' SIGINT SIGQUIT SIGTSTP
 while true
 do
  if [[ -f "$CPANELFILE" ]]; then
+    trueUserDomain=$(grep $phpDomain /etc/trueuserdomains)
+    userName=${trueUserDomain#$phpDomain: }
+    userData=$(grep "documentroot:" /var/cpanel/userdata/$userName/$phpDomain)
+    documentRoot=${userData#"documentroot: "}
 	show_cpanel_menu
 	read_options_cpanel
     elif
