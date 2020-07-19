@@ -27,7 +27,7 @@ pause(){
 
 one(){
 	clear
-	tail -n 25 -f /usr/local/apache/domlogs/$phpDomain-ssl_log /usr/local/apache/domlogs/$phpDomain 
+	tail -n 20 -f /usr/local/apache/domlogs/$phpDomain-ssl_log /usr/local/apache/domlogs/$phpDomain 
 
 }
 
@@ -137,12 +137,12 @@ pause(){
 
 pleskone(){
 	clear
-	tail -n 25 -f /var/www/vhosts/system/$phpdomain/logs/access_ssl_log /var/www/vhosts/system/$phpdomain/logs/access_log
-
+	tail -n 20 -f /var/www/vhosts/system/$phpDomain/logs/access_ssl_log /var/www/vhosts/system/$phpdomain/logs/access_log
+    pause
 }
 
 plesktwo(){
-    less +G /var/www/vhosts/$phpdomain/error_log
+    less +G /var/www/vhosts/$phpDomain/error_log
 
 }
 
@@ -173,7 +173,7 @@ pleskseven(){
 
 pleskeight(){
 	watch -n 1 "mysql -uroot -e 'show processlist;'"
-    
+
 }
  
 # function to display menus
@@ -183,8 +183,8 @@ show_plesk_menu() {
 	echo "Plesk - MAIN MENU"
 	echo "SELECT A FILE TO OPEN"
 	echo "~~~~~~~~~~~~~~~~~~~~~"
-	echo "1. /var/www/vhosts/system/$phpdomain/logs/access_log -- HTTPS and HTTP"
-    echo "2. /var/www/vhosts/$phpdomain/error_log"
+	echo "1. /var/www/vhosts/system/$phpDomain/logs/access_log -- HTTPS and HTTP"
+    echo "2. /var/www/vhosts/$phpDomain/error_log"
     echo "3. /var/log/httpd/error_log"
 	echo "4. /var/log/mysqld.log"
 	echo "5. /var/log/messages"
