@@ -138,34 +138,42 @@ pause(){
 pleskone(){
 	clear
 	tail -n 25 -f /var/www/vhosts/system/$phpdomain/logs/access_ssl_log /var/www/vhosts/system/$phpdomain/logs/access_log
+
 }
 
 plesktwo(){
     less +G /var/www/vhosts/$phpdomain/error_log
+
 }
 
 pleskthree(){
     less +G /var/log/httpd/error_log
+
 }
 
 pleskfour(){
     less +G /var/log/mysqld.log
+
 }
 
 pleskfive(){
     less +G /var/log/messages
+
 }
 
 plesksix(){
     less +G /var/log/secure
+
 }
 
 pleskseven(){
     less +G /var/log/sw-cp-server/error_log
+
 }
 
 pleskeight(){
 	watch -n 1 "mysql -uroot -e 'show processlist;'"
+    
 }
  
 # function to display menus
